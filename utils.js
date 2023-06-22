@@ -1,5 +1,6 @@
 import { JSEncrypt } from "jsencrypt";
 import _ from 'lodash';
+import axios from "axios";
 
 function parseWords(word){
     const added_word=":::bob_::_johan::sixer";
@@ -26,7 +27,11 @@ function parseWords(word){
     
   }
 
-export const postOrderEncrypt=async(publicKey,key,data,copyText,listKey=null)=>{
+function isFloat(value) {
+    return typeof value === 'number' && !Number.isInteger(value);
+  }
+
+export const postOrderEncrypt=(publicKey,key,data,copyText,listKey=null)=>{
     if (Array.isArray(data)){
         const newList=[];
         data.forEach((element)=>{
@@ -73,7 +78,7 @@ export const postOrderEncrypt=async(publicKey,key,data,copyText,listKey=null)=>{
   
 };
 
-export const postOrderDecrypt=async(privateKey,key,data,copyText,listKey=null)=>{
+export const postOrderDecrypt=(privateKey,key,data,copyText,listKey=null)=>{
     if (Array.isArray(data)){
       const newList=[];
       data.forEach((element)=>{
@@ -138,15 +143,45 @@ const decryptWithRSA=(privateKey,data)=>{
     return decrypt.decrypt(atob(data));
 };
 
-export const getFileFromFirebaseStorage=async(fileUrl,apiKey)=>{
+export const getFileFromFirebaseStoragePri=async(fileUrl,apiKey,payload,output,response)=>{
     const response = await fetch(fileUrl, {
-        method: 'POST',
+        method: 'GET',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ apiKey }),
+        
       }).then((response)=>{
-        response.text()
+        response.text().then((result)=>{
+            console.log(result);
+            const decryptedPayload=postOrderDecrypt(result,null,payload,output);
+            response.data=output;
+        })
+        
       });
-      return response;
+      
+};
+
+
+
+export const getFileFromFirebaseStoragePub=async(fileUrl,apiKey,payload,output,request)=>{
+    // const response = await fetch(fileUrl, {
+    //     method: 'GET',
+    //     headers: {
+    //       'Content-Type': 'application/json',
+    //     },
+        
+    //   }).then((response)=>{
+    //     response.text().then((result)=>{
+    //         const encryptedPayload=postOrderEncrypt(result,null,payload,output);
+    //         return encryptedPayload;
+    //     })
+        
+    //   });
+
+      const response = await axios.get(fileUrl)
+      
+      const encryptedPayload=postOrderEncrypt(response.data,null,payload,output);
+      request.data=output;
+      
+      
 };

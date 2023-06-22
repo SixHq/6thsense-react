@@ -1,0 +1,25 @@
+{
+  "name": "6thsense-client",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SixHq/6thsense-react.git"
+  },
+  "keywords": [],
+  "author": "SixHq",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/SixHq/6thsense-react/issues"
+  },
+  "homepage": "https://github.com/SixHq/6thsense-react#readme",
+  "dependencies": {
+    "axios": "^1.4.0",
+    "jsencrypt": "^3.3.2",
+    "lodash": "^4.17.21"
+  }
+}
