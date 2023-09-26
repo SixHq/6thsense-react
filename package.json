@@ -18,8 +18,9 @@
   },
   "homepage": "https://github.com/SixHq/6thsense-react#readme",
   "dependencies": {
+    "aes-everywhere": "^1.0.0",
     "axios": "^1.4.0",
-    "jsencrypt": "^3.3.2",
-    "lodash": "^4.17.21"
+    "lodash": "^4.17.21",
+    "uuid": "^9.0.1"
   }
 }

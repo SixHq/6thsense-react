@@ -1,4 +1,4 @@
-import { postOrderEncrypt,postOrderDecrypt, getFileFromFirebaseStorage, getFileFromFirebaseStoragePub, getFileFromFirebaseStoragePri } from "./utils";
+import { postOrderEncrypt,postOrderDecrypt } from "./utils";
 import _ from 'lodash';
 import axios from "axios";
 
@@ -6,67 +6,41 @@ export default class sixthSenseClient{
     constructor(apiKey){
         this.apiKey=apiKey;
     }
-    async encryptRequest(payload,axiosInstance){
+    async encryptRequest(axiosInstance){
+      const apiKey=this.apiKey;
       try{
         axiosInstance.interceptors.request.use(
           (request) => {
             // Modify the request body
-        const apiKey=this.apiKey;
-        const output= _.cloneDeep(request.data);
-        const resOutput= _.cloneDeep(request.data);
-  
-        fetch('https://backend.withsix.co/encryption-service/get-user-public-key',{
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ "apiKey":apiKey }),
-          }).then((response)=>{
-            response.json().then((response)=>{
-              console.log(response.data)
-                getFileFromFirebaseStoragePub(response.data.public_key,this.apiKey,request.data,output,request)
-            })
-          })
-  
+        if(request.data!=null){
+          const output= _.cloneDeep(request.data);
+          request.data=postOrderEncrypt(request.data);
+        }
+        return request;
         
-            return request;
-          },
-          (error) => {
+          },(error) => {
             console.log('Request Interceptor - Error:', error);
             return Promise.reject(error);
           }
         );
-         
-      }catch(err){
-        console.log('%c provided object not an axios instance ', 'color: red');
-      }
 
-      }
+      
+    }catch(err){
+      console.log('%c provided object not an axios instance ', 'color: red');
+    }
+  }
 
-    async decryptResponse(payload){
+    async decryptResponse(axiosInstance){
         const apiKey=this.apiKey;
-        const output= _.cloneDeep(payload);
-        const resOutput= _.cloneDeep(payload);
 
         try{
           axiosInstance.interceptors.request.use(
             (res) => {
-              // Modify the request body
-              fetch('https://backend.withsix.co/encryption-service/get-user-private-key',{
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ apiKey }),
-              }).then((response)=>{
-                response.json().then((response)=>{
-                    getFileFromFirebaseStoragePri(response.data.private_key,this.apiKey,res.data,output,res)
-                    
-                    
-                })
-              })
-    
-          
+              const apiKey=this.apiKey;
+              if(res.data!=null){
+                const output= _.cloneDeep(res.data);
+                res.data=postOrderDecrypt(res.data);
+              }
               return res;
             },
             (error) => {
