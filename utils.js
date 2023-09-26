@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import {v4 as uuid4} from 'uuid';
+import aesjs from 'aes-everywhere';
 
-const aesjs = require('aes-everywhere');
 
 function parseWords(word){
     const added_word=":::bob_::_johan::sixer";
@@ -30,20 +30,18 @@ function parseWords(word){
 
   export function postOrderEncrypt(payload){
     const newSecretKey=uuid4().substring(0,16);
+    console.log(newSecretKey,"secret")
     const secretKeyPartOne= newSecretKey.substring(0,4);
     const secretKeyPartTwo= newSecretKey.substring(4,8);
     const secretKeyPartThree= newSecretKey.substring(8,12);
     const secretKeyPartFour= newSecretKey.substring(12,16);
-    var encryptedData = aesjs.encrypt(payload,newSecretKey);
+    
+    var encryptedData = aesjs.encrypt(JSON.stringify(payload),newSecretKey);
+    console.log(encryptedData,"data")
     const positions=[4,8,12,16];
     const keys=[secretKeyPartOne,secretKeyPartTwo,secretKeyPartThree,secretKeyPartFour];
     let counter=0;
-    for(const position of positions){
-      if (position >= 0 && position <= encryptedData.length) {
-        encryptedData= encryptedData.slice(0, position) + keys[counter] + encryptedData.slice(position);
-      }
-      counter=counter+1;
-    }
+    encryptedData=encryptedData.slice(0, positions[0]) + keys[0] + encryptedData.slice(positions[0],positions[1]) + keys[1] +encryptedData.slice(positions[1],positions[2]) + keys[2] + encryptedData.slice(positions[2],positions[3]) + keys[3]+ encryptedData.slice(positions[3]);
     return encryptedData;
   
   }
@@ -51,20 +49,11 @@ function parseWords(word){
 
 
   export function postOrderDecrypt(encryptedPayload){
-    const positions=[16,12,8,4];
     var secretKey="";
-    const secretKeyParts=[];
     var newEncryptedPayload=encryptedPayload;
-    for(const position of positions){
-      secretKeyParts.push(newEncryptedPayload.substring(position,position+4));
-      newEncryptedPayload=newEncryptedPayload.slice(0,position)+newEncryptedPayload.slice(position+4,newEncryptedPayload.length)
-    }
-    secretKeyParts.reverse();
-    for (const part of secretKeyParts){
-      secretKey=secretKey+part;
-    }
+    secretKey=newEncryptedPayload.slice(4,8)+newEncryptedPayload.slice(12,16)+newEncryptedPayload.slice(20,24)+newEncryptedPayload.slice(28,32);
+    newEncryptedPayload=newEncryptedPayload.slice(0,4)+newEncryptedPayload.slice(8,12)+newEncryptedPayload.slice(16,20)+newEncryptedPayload.slice(24,28)+newEncryptedPayload.slice(32)
+    
     const decryptedPayload=aesjs.decrypt(newEncryptedPayload,secretKey);
-    return decryptedPayload;
+    return JSON.parse(decryptedPayload);
   }
-
-
